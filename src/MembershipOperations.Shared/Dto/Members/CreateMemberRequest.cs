@@ -2,7 +2,7 @@
 
 namespace MembershipOperations.Shared.Dto.Members;
 
-public class UpdateMemberRequest
+public class CreateMemberRequest
 {
     [Required, StringLength(100)]
     public string FirstName { get; set; } = string.Empty;
@@ -12,6 +12,4 @@ public class UpdateMemberRequest
 
     [EmailAddress, StringLength(256)]
     public string? Email { get; set; }
-
-    public bool IsActive { get; set; }
 }
