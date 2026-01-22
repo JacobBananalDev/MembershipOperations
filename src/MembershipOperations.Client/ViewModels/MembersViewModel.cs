@@ -1,6 +1,7 @@
-﻿using System.Collections.ObjectModel;
-using MembershipOperations.Client.Services;
+﻿using MembershipOperations.Client.Services;
 using MembershipOperations.Shared.Dto.Members;
+using Microsoft.Extensions.DependencyInjection;
+using System.Collections.ObjectModel;
 
 namespace MembershipOperations.Client.ViewModels;
 
@@ -12,16 +13,18 @@ public class MembersViewModel : ViewModelBase
     private bool _activeOnly = true;
     private string _statusMessage = "";
     private bool _isBusy;
+    private readonly IServiceProvider _sp;
 
-    public MembersViewModel(MembersApi membersApi)
+    public MembersViewModel(MembersApi membersApi, IServiceProvider sp)
     {
         _membersApi = membersApi;
+        _sp = sp;
 
         Members = new ObservableCollection<MemberDto>();
 
         RefreshCommand = new RelayCommand(async () => await RefreshAsync(), () => !IsBusy);
+        CreateCommand = new RelayCommand(async () => await CreateAsync(), () => !IsBusy);
 
-        // load immediately
         _ = RefreshAsync();
     }
 
@@ -85,4 +88,41 @@ public class MembersViewModel : ViewModelBase
             IsBusy = false;
         }
     }
+
+    public System.Windows.Input.ICommand CreateCommand { get; }
+
+    private async Task CreateAsync()
+    {
+        var vm = _sp.GetRequiredService<CreateMemberViewModel>();
+        var win = _sp.GetRequiredService<MembershipOperations.Client.Views.CreateMemberWindow>();
+
+        // IMPORTANT: this ensures the window uses THIS vm instance
+        win.DataContext = vm;
+        win.Owner = System.Windows.Application.Current.MainWindow;
+
+        bool? ok = win.ShowDialog();
+        if (ok != true)
+            return;
+
+        try
+        {
+            IsBusy = true;
+            StatusMessage = "Creating member...";
+
+            var created = await _membersApi.CreateMemberAsync(vm.ToRequest());
+
+            StatusMessage = $"Created member #{created.Id}. Refreshing...";
+            await RefreshAsync();
+        }
+        catch (Exception ex)
+        {
+            vm.StatusMessage = ex.Message;
+            StatusMessage = "Create failed.";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
 }

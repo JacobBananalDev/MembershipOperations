@@ -15,5 +15,11 @@ public partial class CreateMemberWindow : Window
             DialogResult = false;
             Close();
         };
+
+        vm.SaveRequested += () =>
+        {
+            DialogResult = true;
+            Close();
+        };
     }
 }

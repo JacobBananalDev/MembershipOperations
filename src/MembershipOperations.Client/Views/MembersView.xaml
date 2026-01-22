@@ -22,6 +22,11 @@
                     Height="30"
                     Margin="12 0 0 0"
                     Command="{Binding RefreshCommand}" />
+
+            <Button Content="Create"
+                    Height="30"
+                    Margin="12 0 0 0"
+                    Command="{Binding CreateCommand}" />
         </DockPanel>
 
         <DataGrid Grid.Row="1"
