@@ -61,6 +61,9 @@ public partial class App : Application
 
                 services.AddTransient<MembersViewModel>();
                 services.AddTransient<MembershipOperations.Client.Views.MembersView>();
+
+                services.AddTransient<CreateMemberViewModel>();
+                services.AddTransient<CreateMemberWindow>();
             })
             .Build();
 
