@@ -53,6 +53,9 @@ public partial class App : Application
 
                 services.AddTransient<LoginViewModel>();
                 services.AddTransient<LoginWindow>();
+
+                services.AddTransient<MainViewModel>();
+                services.AddTransient<MainWindow>();
             })
             .Build();
 
@@ -68,9 +71,12 @@ public partial class App : Application
             return;
         }
 
-        // TEMP: until MainWindow exists
-        MessageBox.Show("Login succeeded. Next: open MainWindow.");
-        Shutdown();
+        var main = _host.Services.GetRequiredService<MembershipOperations.Client.Views.MainWindow>();
+        main.Show();
+
+        // important: set shutdown mode so app closes when main closes
+        ShutdownMode = ShutdownMode.OnMainWindowClose;
+        MainWindow = main;
     }
 
     protected override async void OnExit(ExitEventArgs e)
