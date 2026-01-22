@@ -9,14 +9,5 @@ public partial class CreateMemberWindow : Window
     {
         InitializeComponent();
         DataContext = vm;
-
-        vm.CancelRequested += () =>
-        {
-            DialogResult = false;
-            Close();
-        };
-
-        // IMPORTANT: do NOT close on Save here anymore
-        vm.SaveRequested += () => { /* handled by caller */ };
     }
 }

@@ -104,64 +104,50 @@ public class MembersViewModel : ViewModelBase
 
         var vm = (CreateMemberViewModel)win.DataContext;
 
-        var tcs = new TaskCompletionSource<bool>();
+        // Wire events
+        async void OnSaveRequested()
+        {
+            try
+            {
+                vm.IsBusy = true;
+                vm.StatusMessage = "Creating member...";
 
-        void OnSaveRequested() => tcs.TrySetResult(true);
-        void OnCancelRequested() => tcs.TrySetResult(false);
+                var created = await _membersApi.CreateMemberAsync(vm.ToRequest());
+
+                win.DialogResult = true;   // OK because we will show with ShowDialog()
+                win.Close();
+
+                StatusMessage = $"Created member #{created.Id}. Refreshing...";
+                await RefreshAsync();
+            }
+            catch (Exception ex)
+            {
+                vm.StatusMessage = ex.Message; // keep dialog open
+            }
+            finally
+            {
+                vm.IsBusy = false;
+            }
+        }
+
+        void OnCancelRequested()
+        {
+            win.DialogResult = false; // OK with ShowDialog()
+            win.Close();
+        }
 
         vm.SaveRequested += OnSaveRequested;
         vm.CancelRequested += OnCancelRequested;
 
         try
         {
-            win.Show();
-
-            while (true)
-            {
-                // Wait until user clicks Save or Cancel
-                var wantsSave = await tcs.Task;
-                tcs = new TaskCompletionSource<bool>();
-
-                if (!wantsSave)
-                {
-                    win.Close();
-                    return;
-                }
-
-                // Save clicked -> attempt API call
-                try
-                {
-                    vm.IsBusy = true;
-                    vm.StatusMessage = "Creating member...";
-
-                    var created = await _membersApi.CreateMemberAsync(vm.ToRequest());
-
-                    // success -> close dialog
-                    win.DialogResult = true;
-                    win.Close();
-
-                    StatusMessage = $"Created member #{created.Id}. Refreshing...";
-                    await RefreshAsync();
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    // keep dialog open, show error
-                    vm.StatusMessage = ex.Message;
-                }
-                finally
-                {
-                    vm.IsBusy = false;
-                }
-            }
+            // This blocks until window closes, but Save is async and will NOT freeze UI
+            win.ShowDialog();
         }
         finally
         {
             vm.SaveRequested -= OnSaveRequested;
             vm.CancelRequested -= OnCancelRequested;
-
-            if (win.IsVisible)
-                win.Close();
         }
     }
 
