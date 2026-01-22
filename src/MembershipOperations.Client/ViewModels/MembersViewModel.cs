@@ -102,30 +102,66 @@ public class MembersViewModel : ViewModelBase
         var win = _sp.GetRequiredService<MembershipOperations.Client.Views.CreateMemberWindow>();
         win.Owner = System.Windows.Application.Current.MainWindow;
 
-        bool? ok = win.ShowDialog();
-        if (ok != true)
-            return;
-
-        // Get the same VM instance the window used
         var vm = (CreateMemberViewModel)win.DataContext;
+
+        var tcs = new TaskCompletionSource<bool>();
+
+        void OnSaveRequested() => tcs.TrySetResult(true);
+        void OnCancelRequested() => tcs.TrySetResult(false);
+
+        vm.SaveRequested += OnSaveRequested;
+        vm.CancelRequested += OnCancelRequested;
 
         try
         {
-            IsBusy = true;
-            StatusMessage = "Creating member...";
+            win.Show();
 
-            var created = await _membersApi.CreateMemberAsync(vm.ToRequest());
+            while (true)
+            {
+                // Wait until user clicks Save or Cancel
+                var wantsSave = await tcs.Task;
+                tcs = new TaskCompletionSource<bool>();
 
-            StatusMessage = $"Created member #{created.Id}. Refreshing...";
-            await RefreshAsync();
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = ex.Message;
+                if (!wantsSave)
+                {
+                    win.Close();
+                    return;
+                }
+
+                // Save clicked -> attempt API call
+                try
+                {
+                    vm.IsBusy = true;
+                    vm.StatusMessage = "Creating member...";
+
+                    var created = await _membersApi.CreateMemberAsync(vm.ToRequest());
+
+                    // success -> close dialog
+                    win.DialogResult = true;
+                    win.Close();
+
+                    StatusMessage = $"Created member #{created.Id}. Refreshing...";
+                    await RefreshAsync();
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    // keep dialog open, show error
+                    vm.StatusMessage = ex.Message;
+                }
+                finally
+                {
+                    vm.IsBusy = false;
+                }
+            }
         }
         finally
         {
-            IsBusy = false;
+            vm.SaveRequested -= OnSaveRequested;
+            vm.CancelRequested -= OnCancelRequested;
+
+            if (win.IsVisible)
+                win.Close();
         }
     }
 
