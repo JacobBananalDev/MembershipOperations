@@ -1,3 +1,4 @@
+using MembershipOperations.Api.Data;
 using MembershipOperations.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,9 +15,16 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline. 
+// DEV-ONLY: seed database
 if (app.Environment.IsDevelopment())
 {
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider
+        .GetRequiredService<ApplicationDbContext>();
+
+    await DbInitializer.SeedAsync(db);
+
     app.UseSwagger();
     app.UseSwaggerUI();
 }

@@ -15,10 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\MembershipOperations.Domain\MembershipOperations.Domain.csproj" />
     <ProjectReference Include="..\MembershipOperations.Infrastructure\MembershipOperations.Infrastructure.csproj" />
     <ProjectReference Include="..\MembershipOperations.Shared\MembershipOperations.Shared.csproj" />
