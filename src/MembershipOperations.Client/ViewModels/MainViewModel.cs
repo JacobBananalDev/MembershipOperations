@@ -8,10 +8,10 @@ public class MainViewModel : ViewModelBase
 
     private object? _currentView;
 
-    public MainViewModel(AuthSession session, MembersViewModel membersVm)
+    public MainViewModel(AuthSession session, MembershipOperations.Client.Views.MembersView membersView)
     {
         _session = session;
-        CurrentView = membersVm;
+        CurrentView = membersView;
     }
 
     public object? CurrentView
