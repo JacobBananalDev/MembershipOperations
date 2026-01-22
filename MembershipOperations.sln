@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MembershipOperations.Infras
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MembershipOperations.Shared", "src\MembershipOperations.Shared\MembershipOperations.Shared.csproj", "{D5F634F7-6020-4884-A0D3-F7B62F9CEFF0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MembershipOperations.Client", "src\MembershipOperations.Client\MembershipOperations.Client.csproj", "{1E106220-6CCC-462D-B944-F9B2A44A581D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{D5F634F7-6020-4884-A0D3-F7B62F9CEFF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5F634F7-6020-4884-A0D3-F7B62F9CEFF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5F634F7-6020-4884-A0D3-F7B62F9CEFF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E106220-6CCC-462D-B944-F9B2A44A581D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E106220-6CCC-462D-B944-F9B2A44A581D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E106220-6CCC-462D-B944-F9B2A44A581D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E106220-6CCC-462D-B944-F9B2A44A581D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
