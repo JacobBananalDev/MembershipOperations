@@ -56,6 +56,8 @@ public partial class App : Application
 
                 services.AddTransient<MainViewModel>();
                 services.AddTransient<MainWindow>();
+
+                services.AddScoped<MembersApi>();
             })
             .Build();
 
