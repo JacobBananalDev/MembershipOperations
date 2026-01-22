@@ -1,4 +1,5 @@
 ﻿using MembershipOperations.Domain.Entities;
+using MembershipOperations.Domain.Services;
 using MembershipOperations.Infrastructure.Persistence;
 using MembershipOperations.Shared.Dto.Common;
 using MembershipOperations.Shared.Dto.Members;
@@ -12,10 +13,12 @@ namespace MembershipOperations.Api.Controllers;
 public class MembersController : ControllerBase
 {
     private readonly ApplicationDbContext _db;
+    private readonly IAuditLogger _audit;
 
-    public MembersController(ApplicationDbContext db)
+    public MembersController(ApplicationDbContext db, IAuditLogger audit)
     {
         _db = db;
+        _audit = audit;
     }
 
     [HttpGet]
@@ -114,6 +117,19 @@ public class MembersController : ControllerBase
         _db.Members.Add(entity);
         await _db.SaveChangesAsync();
 
+        await _audit.LogAsync(
+    actor: "dev",
+    action: "MemberCreated",
+    entityType: "Member",
+    entityId: entity.Id.ToString(),
+    detailsJson: System.Text.Json.JsonSerializer.Serialize(new
+    {
+        entity.FirstName,
+        entity.LastName,
+        entity.Email
+    })
+);
+
         var dto = new MemberDto
         {
             Id = entity.Id,
@@ -149,6 +165,21 @@ public class MembersController : ControllerBase
         entity.IsActive = request.IsActive;
 
         await _db.SaveChangesAsync();
+
+        await _audit.LogAsync(
+    actor: "dev",
+    action: "MemberUpdated",
+    entityType: "Member",
+    entityId: entity.Id.ToString(),
+    detailsJson: System.Text.Json.JsonSerializer.Serialize(new
+    {
+        entity.FirstName,
+        entity.LastName,
+        entity.Email,
+        entity.IsActive
+    })
+);
+
         return NoContent();
     }
 
@@ -163,6 +194,15 @@ public class MembersController : ControllerBase
         entity.IsActive = false;
 
         await _db.SaveChangesAsync();
+
+        await _audit.LogAsync(
+    actor: "dev",
+    action: "MemberDeactivated",
+    entityType: "Member",
+    entityId: entity.Id.ToString()
+);
+
+
         return NoContent();
     }
 }
