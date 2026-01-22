@@ -1,11 +1,13 @@
 ﻿using MembershipOperations.Infrastructure.Persistence;
 using MembershipOperations.Shared.Dto.Audit;
 using MembershipOperations.Shared.Dto.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace MembershipOperations.Api.Controllers;
 
+[Authorize(Policy = "AdminOnly")]
 [ApiController]
 [Route("api/[controller]")]
 public class AuditLogsController : ControllerBase

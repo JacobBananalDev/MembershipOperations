@@ -13,6 +13,7 @@ namespace MembershipOperations.Infrastructure.Persistence
         public DbSet<Member> Members => Set<Member>();
         public DbSet<MembershipPlan> MembershipPlans => Set<MembershipPlan>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+        public DbSet<AppUser> Users => Set<AppUser>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -41,6 +42,16 @@ namespace MembershipOperations.Infrastructure.Persistence
                 e.Property(x => x.Action).HasMaxLength(100).IsRequired();
                 e.Property(x => x.EntityType).HasMaxLength(100).IsRequired();
                 e.Property(x => x.EntityId).HasMaxLength(50).IsRequired();
+            });
+
+            modelBuilder.Entity<AppUser>(e =>
+            {
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Username).HasMaxLength(50).IsRequired();
+                e.HasIndex(x => x.Username).IsUnique();
+
+                e.Property(x => x.PasswordHash).IsRequired();
+                e.Property(x => x.Role).HasMaxLength(20).IsRequired();
             });
         }
     }
