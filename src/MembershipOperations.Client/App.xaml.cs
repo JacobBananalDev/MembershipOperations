@@ -41,8 +41,21 @@ public partial class App : Application
                 });
 
                 services.AddScoped<AuthApi>();
+
+                services.AddTransient<ViewModels.LoginViewModel>();
+                services.AddTransient<Views.LoginWindow>();
             })
             .Build();
+
+        var login = _host.Services.GetRequiredService<MembershipOperations.Client.Views.LoginWindow>();
+        var ok = login.ShowDialog();
+
+        if (ok != true)
+        {
+            Shutdown();
+            return;
+        }
+
 
         base.OnStartup(e);
 

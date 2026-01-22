@@ -19,8 +19,4 @@
     <ProjectReference Include="..\MembershipOperations.Shared\MembershipOperations.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Views\" />
-  </ItemGroup>
-
 </Project>
