@@ -1,9 +1,10 @@
-﻿using System.IO;
-using System.Windows;
+﻿using MembershipOperations.Client.Core;
+using MembershipOperations.Client.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using MembershipOperations.Client.Core;
+using System.IO;
+using System.Windows;
 
 namespace MembershipOperations.Client;
 
@@ -30,6 +31,16 @@ public partial class App : Application
                     var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<ApiOptions>>().Value;
                     http.BaseAddress = new Uri(options.BaseUrl);
                 });
+
+                services.AddSingleton<AuthSession>();
+
+                services.AddHttpClient<ApiClient>((sp, http) =>
+                {
+                    var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<ApiOptions>>().Value;
+                    http.BaseAddress = new Uri(options.BaseUrl);
+                });
+
+                services.AddScoped<AuthApi>();
             })
             .Build();
 
