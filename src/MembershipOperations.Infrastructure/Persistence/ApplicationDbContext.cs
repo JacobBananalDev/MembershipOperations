@@ -24,8 +24,8 @@ namespace MembershipOperations.Infrastructure.Persistence
                 e.HasKey(x => x.Id);
                 e.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
                 e.Property(x => x.LastName).HasMaxLength(100).IsRequired();
-                e.Property(x => x.Email).HasMaxLength(256);
-                e.HasIndex(x => x.Email);
+                e.Property(x => x.Email).HasMaxLength(256).IsRequired(false);
+                e.HasIndex(x => x.Email).IsUnique();
             });
 
             modelBuilder.Entity<MembershipPlan>(e =>

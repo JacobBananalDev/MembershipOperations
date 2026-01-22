@@ -51,7 +51,13 @@ public class MembersViewModel : ViewModelBase
     public bool IsBusy
     {
         get => _isBusy;
-        set { _isBusy = value; OnPropertyChanged(); ((RelayCommand)RefreshCommand).RaiseCanExecuteChanged(); }
+        set 
+        { 
+            _isBusy = value; 
+            OnPropertyChanged();
+            (RefreshCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (CreateCommand as RelayCommand)?.RaiseCanExecuteChanged();
+        }
     }
 
     public System.Windows.Input.ICommand RefreshCommand { get; }
@@ -93,16 +99,15 @@ public class MembersViewModel : ViewModelBase
 
     private async Task CreateAsync()
     {
-        var vm = _sp.GetRequiredService<CreateMemberViewModel>();
         var win = _sp.GetRequiredService<MembershipOperations.Client.Views.CreateMemberWindow>();
-
-        // IMPORTANT: this ensures the window uses THIS vm instance
-        win.DataContext = vm;
         win.Owner = System.Windows.Application.Current.MainWindow;
 
         bool? ok = win.ShowDialog();
         if (ok != true)
             return;
+
+        // Get the same VM instance the window used
+        var vm = (CreateMemberViewModel)win.DataContext;
 
         try
         {
@@ -116,13 +121,13 @@ public class MembersViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            vm.StatusMessage = ex.Message;
-            StatusMessage = "Create failed.";
+            StatusMessage = ex.Message;
         }
         finally
         {
             IsBusy = false;
         }
     }
+
 
 }

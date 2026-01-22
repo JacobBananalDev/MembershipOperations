@@ -100,9 +100,13 @@ public class MembersController : ControllerBase
     public async Task<ActionResult<MemberDto>> CreateMember([FromBody] CreateMemberRequest request)
     {
         // Optional uniqueness check
-        if (!string.IsNullOrWhiteSpace(request.Email))
+        var email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim();
+
+        if (email != null)
         {
-            var emailExists = await _db.Members.AnyAsync(m => m.Email == request.Email);
+            var emailExists = await _db.Members.AnyAsync(m =>
+                m.Email != null && m.Email.ToLower() == email.ToLower());
+
             if (emailExists)
                 return Conflict(new ProblemDetails { Title = "Email already exists." });
         }
@@ -111,7 +115,7 @@ public class MembersController : ControllerBase
         {
             FirstName = request.FirstName.Trim(),
             LastName = request.LastName.Trim(),
-            Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim(),
+            Email = email,
             IsActive = true,
             CreatedAtUtc = DateTime.UtcNow
         };
