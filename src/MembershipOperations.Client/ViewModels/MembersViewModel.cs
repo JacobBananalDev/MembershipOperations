@@ -24,6 +24,7 @@ public class MembersViewModel : ViewModelBase
 
         RefreshCommand = new RelayCommand(async () => await RefreshAsync(), () => !IsBusy);
         CreateCommand = new RelayCommand(async () => await CreateAsync(), () => !IsBusy);
+        EditCommand = new RelayCommand(async () => await EditAsync(), () => !IsBusy && SelectedMember != null);
 
         _ = RefreshAsync();
     }
@@ -57,6 +58,7 @@ public class MembersViewModel : ViewModelBase
             OnPropertyChanged();
             (RefreshCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (CreateCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (EditCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
 
@@ -151,5 +153,70 @@ public class MembersViewModel : ViewModelBase
         }
     }
 
+    private MemberDto? _selectedMember;
+
+    public MemberDto? SelectedMember
+    {
+        get => _selectedMember;
+        set
+        {
+            _selectedMember = value;
+            OnPropertyChanged();
+            (EditCommand as RelayCommand)?.RaiseCanExecuteChanged();
+        }
+    }
+
+    public System.Windows.Input.ICommand EditCommand { get; }
+
+    private async Task EditAsync()
+    {
+        if (SelectedMember == null)
+            return;
+
+        var win = _sp.GetRequiredService<MembershipOperations.Client.Views.EditMemberWindow>();
+        win.Owner = System.Windows.Application.Current.MainWindow;
+
+        var vm = (EditMemberViewModel)win.DataContext;
+        vm.LoadFrom(SelectedMember);
+
+        async void OnSaveRequested()
+        {
+            try
+            {
+                vm.IsBusy = true;
+                vm.StatusMessage = "Saving changes...";
+
+                await _membersApi.UpdateMemberAsync(vm.Id, vm.ToRequest());
+
+                win.Close();
+
+                StatusMessage = $"Updated member #{vm.Id}. Refreshing...";
+                await RefreshAsync();
+            }
+            catch (Exception ex)
+            {
+                vm.StatusMessage = ex.Message;
+            }
+            finally
+            {
+                vm.IsBusy = false;
+            }
+        }
+
+        void OnCancelRequested() => win.Close();
+
+        vm.SaveRequested += OnSaveRequested;
+        vm.CancelRequested += OnCancelRequested;
+
+        try
+        {
+            win.ShowDialog(); // modal edit dialog
+        }
+        finally
+        {
+            vm.SaveRequested -= OnSaveRequested;
+            vm.CancelRequested -= OnCancelRequested;
+        }
+    }
 
 }

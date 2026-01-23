@@ -49,4 +49,14 @@ public class MembersApi
 
         return dto;
     }
+
+    public async Task UpdateMemberAsync(int id, UpdateMemberRequest request, CancellationToken ct = default)
+    {
+        var response = await _api.PutAsync($"/api/members/{id}", request, ct);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            throw new InvalidOperationException("Email already exists.");
+
+        response.EnsureSuccessStatusCode();
+    }
 }
