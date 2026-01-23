@@ -59,4 +59,10 @@ public class MembersApi
 
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task DeactivateMemberAsync(int id, CancellationToken ct = default)
+    {
+        var response = await _api.DeleteAsync($"/api/members/{id}", ct);
+        response.EnsureSuccessStatusCode();
+    }
 }

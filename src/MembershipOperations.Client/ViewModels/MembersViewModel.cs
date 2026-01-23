@@ -25,6 +25,7 @@ public class MembersViewModel : ViewModelBase
         RefreshCommand = new RelayCommand(async () => await RefreshAsync(), () => !IsBusy);
         CreateCommand = new RelayCommand(async () => await CreateAsync(), () => !IsBusy);
         EditCommand = new RelayCommand(async () => await EditAsync(), () => !IsBusy && SelectedMember != null);
+        DeactivateCommand = new RelayCommand(async () => await DeactivateAsync(), CanDeactivate);
 
         _ = RefreshAsync();
     }
@@ -163,6 +164,7 @@ public class MembersViewModel : ViewModelBase
             _selectedMember = value;
             OnPropertyChanged();
             (EditCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (DeactivateCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
 
@@ -219,4 +221,50 @@ public class MembersViewModel : ViewModelBase
         }
     }
 
+    private bool CanDeactivate()
+    => !IsBusy && SelectedMember != null && SelectedMember.IsActive;
+
+    public System.Windows.Input.ICommand DeactivateCommand { get; }
+
+    private async Task DeactivateAsync()
+    {
+        if (SelectedMember == null)
+            return;
+
+        if (!SelectedMember.IsActive)
+        {
+            StatusMessage = "Member is already inactive.";
+            return;
+        }
+
+        var name = $"{SelectedMember.FirstName} {SelectedMember.LastName}".Trim();
+
+        var result = System.Windows.MessageBox.Show(
+            $"Deactivate member #{SelectedMember.Id} ({name})?\n\nThis will mark the member as inactive (soft delete).",
+            "Confirm Deactivation",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Warning);
+
+        if (result != System.Windows.MessageBoxResult.Yes)
+            return;
+
+        try
+        {
+            IsBusy = true;
+            StatusMessage = "Deactivating member...";
+
+            await _membersApi.DeactivateMemberAsync(SelectedMember.Id);
+
+            StatusMessage = $"Deactivated member #{SelectedMember.Id}. Refreshing...";
+            await RefreshAsync();
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = ex.Message;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
 }
